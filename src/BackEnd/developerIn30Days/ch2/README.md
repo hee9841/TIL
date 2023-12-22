@@ -82,13 +82,13 @@ public class MentalModServer {
     final private static int PORT = 8080;
 
     public static void main(String[] args) throws Exception {
-				//소켓을 확인하여 요청이 이루어졌는지 확인
+        //소켓을 확인하여 요청이 이루어졌는지 확인
         try (ServerSocket serverSocket = new ServerSocket(PORT)) { 
             while (true) {
                 try {
-										//사용자 요청에 대한 데이터 스트림을 포함할 소켓 인스턴스 반환
+                    //사용자 요청에 대한 데이터 스트림을 포함할 소켓 인스턴스 반환
                     Socket client = serverSocket.accept(); 
-                    **handleClient(client);// 여기에서 브레이크 포인트**
+                    handleClient(client);// 여기에서 브레이크 포인트
                  }catch (Exception err) {
                     err.printStackTrace();
                 }
