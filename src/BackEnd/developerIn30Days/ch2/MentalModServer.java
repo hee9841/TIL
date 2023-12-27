@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -31,19 +32,24 @@ public class MentalModServer {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {  //소켓을 확인하여 요청이 이루어졌는지 확인
             while (true) {
                 try {
-                    Socket client = serverSocket.accept(); //사용자 요청에 대한 데이터 스트림을 포함할 소켓 인스턴스 반환
+                    //사용자 요청에 대한 데이터 스트림을 포함할 소켓 인스턴스 반환
+                    //새로운 요청이 생성될 때까지 기다리고 handleClient가 완료되어야 새로운 요청을 생성할 수 있음
+                    //-> 여러 요청을 한꺼번에 처리하기 어려움
+                    Socket client = serverSocket.accept();
                     handleClient(client);
                 } catch (Exception err) {
                     err.printStackTrace();
                 }
 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
-    private static void handleClient(Socket client) throws IOException {
+    private static void handleClient(Socket client) throws IOException, InterruptedException {
+
+        Thread.sleep(10000);
+        System.out.println(" Current time in seconds: " + Instant.now().getNano());
+
         //입력 스트림 가져오기
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(client.getInputStream())  //바이트 스트림을 받음
@@ -54,11 +60,9 @@ public class MentalModServer {
         String line;
 
         //빈 줄을 찾을 때까지 요청의 모든 줄을 읽는다.
-        System.out.println("================READ REQUESTS=====================");
         do {
             line = br.readLine();
             requestsLines.add(line);
-            System.out.println(line);
         } while (line != null && !line.isBlank());
 
         //요청의 첫 번째 줄에서 요청된 경로를 구문 분석함
@@ -92,7 +96,6 @@ public class MentalModServer {
 
     private static void sendResponse(Socket client, String status, String contentType, byte[] content)
             throws IOException {
-        System.out.println("================SEND RESPONSE=====================");
         String LINE_BREAK = "\r\n";
         OutputStream outputStream = client.getOutputStream();
         outputStream.write(("HTTP/1.1 " + status).getBytes());
